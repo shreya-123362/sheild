@@ -10,25 +10,20 @@ import re
 def extract_urls(text):
     """
     Finds all http(s) URLs inside a block of text using regex.
-    Works on both plain text and raw HTML (it just looks for the
-    http:// or https:// pattern, doesn't care what surrounds it).
     """
     if not text:
         return []
 
-    # Matches http:// or https:// followed by non-whitespace, non-quote chars
     url_pattern = r'https?://[^\s"\'<>]+'
     urls = re.findall(url_pattern, text)
 
-    # Dedupe while preserving order (dict.fromkeys is a common Python trick for this)
     return list(dict.fromkeys(urls))
 
 
 def defang_url(url):
     """
     Rewrites a URL so it's safe to paste into chat/reports without
-    it becoming a clickable link. Standard SOC analyst practice.
-    e.g. http://evil.com -> hxxp://evil[.]com
+    it becoming a clickable link.
     """
     defanged = url.replace("http://", "hxxp://")
     defanged = defanged.replace("https://", "hxxps://")
@@ -39,7 +34,6 @@ def defang_url(url):
 def get_domain_from_url(url):
     """
     Extracts just the domain from a full URL.
-    e.g. http://paypa1-verify.com/login?id=123 -> paypa1-verify.com
     """
     match = re.match(r'https?://([^/]+)', url)
     if match:
@@ -49,9 +43,7 @@ def get_domain_from_url(url):
 
 def is_ip_address(domain):
     """
-    Checks if a 'domain' is actually a raw IP address (e.g. http://192.168.1.1/login).
-    Legit companies basically never link directly to a bare IP - this is
-    almost always a red flag or a compromised/throwaway server.
+    Checks if a 'domain' is actually a raw IP address.
     """
     ip_pattern = r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
     return bool(re.match(ip_pattern, domain)) if domain else False
@@ -60,19 +52,48 @@ def is_ip_address(domain):
 def count_subdomains(domain):
     """
     Counts how many subdomain levels a domain has.
-    e.g. 'secure.login.paypal.verify-account.com' has a LOT of dots -
-    attackers pile on subdomains to make fake URLs look more official.
     """
     if not domain:
         return 0
     return domain.count(".")
 
 
+def check_lookalike_domain(domain):
+    """
+    Catches domains trying to LOOK like a known brand but aren't -
+    e.g. 'paypa1-verify.com' instead of 'paypal.com'.
+    """
+    if not domain:
+        return None
+
+    from analyzer.header_forensics import KNOWN_BRANDS
+
+    # Only digit -> letter direction, since that's the direction
+    # typosquatting actually goes (never the reverse).
+    substitutions = {
+        "1": "l",
+        "0": "o",
+        "3": "e",
+        "4": "a",
+        "5": "s",
+        "rn": "m",
+    }
+
+    domain_normalized = domain
+    for fake, real in substitutions.items():
+        domain_normalized = domain_normalized.replace(fake, real)
+
+    for brand in KNOWN_BRANDS:
+        if brand in domain_normalized and brand not in domain:
+            return f"Domain '{domain}' looks like a lookalike of '{brand}' (character substitution trick)"
+
+    return None
+
+
 def analyze_urls(plain_text, html):
     """
     Runs the full URL analysis pipeline: extract from both plain text
     and HTML, dedupe, then flag suspicious ones.
-    Returns a list of dicts, one per unique URL found.
     """
     urls = set()
     urls.update(extract_urls(plain_text))
@@ -88,6 +109,10 @@ def analyze_urls(plain_text, html):
 
         if domain and count_subdomains(domain) >= 4:
             flags.append(f"Unusually high number of subdomains ({count_subdomains(domain)} dots)")
+
+        lookalike = check_lookalike_domain(domain)
+        if lookalike:
+            flags.append(lookalike)
 
         results.append({
             "original": url,
