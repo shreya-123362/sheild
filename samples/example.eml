@@ -1,0 +1,56 @@
+Delivered-To: buddy@example.com
+Received: by 2002:a05:6a20:1234:b0:1a2:3b4c:5d6e with SMTP id abc123;
+        Thu, 18 Sep 2026 02:14:33 -0700 (PDT)
+Received: from mail-relay-99.suspicious-host.ru (mail-relay-99.suspicious-host.ru. [185.220.101.47])
+        by mx.google.com with ESMTPS id xyz789
+        for <buddy@example.com>;
+        Thu, 18 Sep 2026 02:14:32 -0700 (PDT)
+Received-SPF: fail (google.com: domain of security@paypa1-verify.com does not designate 185.220.101.47 as permitted sender)
+Authentication-Results: mx.google.com;
+       spf=fail (google.com: domain of security@paypa1-verify.com does not designate 185.220.101.47 as permitted sender) smtp.mailfrom=security@paypa1-verify.com;
+       dkim=fail header.i=@paypa1-verify.com;
+       dmarc=fail (p=REJECT sp=REJECT dis=NONE) header.from=paypa1-verify.com
+From: "PayPal Security Team" <security@paypa1-verify.com>
+Reply-To: paypal-support@secure-verify-account.com
+To: buddy@example.com
+Return-Path: <bounce@paypa1-verify.com>
+Subject: Urgent: Your Account Has Been Limited
+Date: Thu, 18 Sep 2026 09:14:30 +0000
+Message-ID: <20260918091430.ABCD1234@paypa1-verify.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="boundary-string-here"
+
+--boundary-string-here
+Content-Type: text/plain; charset="UTF-8"
+
+Dear Customer,
+
+We have detected unusual activity on your PayPal account. Your account
+has been temporarily limited. To restore full access, please verify
+your identity immediately by clicking the link below:
+
+http://paypa1-verify-account.com/login/secure?id=8827364
+
+If you do not verify within 24 hours, your account will be permanently
+suspended.
+
+Thank you,
+PayPal Security Team
+
+--boundary-string-here
+Content-Type: text/html; charset="UTF-8"
+
+<html><body>
+<p>Dear Customer,</p>
+<p>We have detected unusual activity on your PayPal account.
+Your account has been <b>temporarily limited</b>. To restore full
+access, please verify your identity immediately by clicking the
+link below:</p>
+<p><a href="http://paypa1-verify-account.com/login/secure?id=8827364">
+Verify My Account</a></p>
+<p>If you do not verify within 24 hours, your account will be
+permanently suspended.</p>
+<p>Thank you,<br>PayPal Security Team</p>
+</body></html>
+
+--boundary-string-here--
