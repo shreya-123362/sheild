@@ -58,3 +58,17 @@ print("=" * 50)
 auth = analyze_auth(headers)
 for k, v in auth.items():
     print(f"{k}: {v}")
+
+# Test URL extraction
+from analyzer.url_analysis import analyze_urls
+
+print("\n" + "=" * 50)
+print("URLS")
+print("=" * 50)
+url_results = analyze_urls(plain_text, html)
+for u in url_results:
+    print(f"Original: {u['original']}")
+    print(f"Defanged: {u['defanged']}")
+    print(f"Domain: {u['domain']}")
+    print(f"Flags: {u['flags']}")
+    print("-" * 30)
