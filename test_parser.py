@@ -72,3 +72,19 @@ for u in url_results:
     print(f"Domain: {u['domain']}")
     print(f"Flags: {u['flags']}")
     print("-" * 30)
+
+# Test attachment analysis + final risk score
+from analyzer.attachment_analysis import analyze_attachments
+from analyzer.risk_scorer import score_email
+
+attachment_results = analyze_attachments(attachments)
+
+print("\n" + "=" * 50)
+print("RISK SCORE")
+print("=" * 50)
+verdict = score_email(results, auth, url_results, attachment_results)
+print(f"Score: {verdict['score']}/100")
+print(f"Level: {verdict['level']}")
+print("Reasons:")
+for r in verdict['reasons']:
+    print(f"  - {r}")
