@@ -48,3 +48,13 @@ print("=" * 50)
 results = analyze_headers(headers)
 for check, result in results.items():
     print(f"{check}: {result}")
+
+# Test SPF/DKIM/DMARC parsing
+from analyzer.auth_checks import analyze_auth
+
+print("\n" + "=" * 50)
+print("AUTHENTICATION (SPF/DKIM/DMARC)")
+print("=" * 50)
+auth = analyze_auth(headers)
+for k, v in auth.items():
+    print(f"{k}: {v}")
