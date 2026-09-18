@@ -38,3 +38,13 @@ if attachments:
         print(f"Filename: {a['filename']}, Type: {a['content_type']}")
 else:
     print("None found")
+
+# Test header forensics
+from analyzer.header_forensics import analyze_headers
+
+print("\n" + "=" * 50)
+print("HEADER FORENSICS")
+print("=" * 50)
+results = analyze_headers(headers)
+for check, result in results.items():
+    print(f"{check}: {result}")
