@@ -5,3 +5,4 @@ output/
 samples/*.eml
 !samples/example.eml
 .env
+uploads/

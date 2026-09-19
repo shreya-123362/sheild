@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SHEILD - Analysis Result</title>
+</head>
+<body>
+    <h1>SHEILD Analysis Report</h1>
+
+    <p><strong>From:</strong> {{ result.headers.get("From", ["Unknown"])[0] }}</p>
+    <p><strong>Subject:</strong> {{ result.headers.get("Subject", ["(no subject)"])[0] }}</p>
+
+    <h2>Verdict</h2>
+    <p><strong>{{ result.verdict.level }}</strong> ({{ result.verdict.score }}/100)</p>
+    <ul>
+        {% for reason in result.verdict.reasons %}
+            <li>{{ reason }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Header Forensics</h2>
+    <ul>
+        <li>From/Reply-To mismatch: {{ result.header_forensics.from_reply_mismatch.mismatch }}</li>
+        <li>From/Return-Path mismatch: {{ result.header_forensics.from_returnpath_mismatch.mismatch }}</li>
+        <li>Brand impersonation: {{ result.header_forensics.brand_impersonation.impersonation }}</li>
+    </ul>
+
+    <h2>Authentication</h2>
+    <ul>
+        <li>SPF: {{ result.auth.spf }}</li>
+        <li>DKIM: {{ result.auth.dkim }}</li>
+        <li>DMARC: {{ result.auth.dmarc }}</li>
+    </ul>
+
+    <h2>URLs Found</h2>
+    {% if result.urls %}
+        <ul>
+            {% for url in result.urls %}
+                <li>
+                    {{ url.defanged }}
+                    {% if url.flags %}
+                        <br><span style="color: red;">FLAGGED: {{ url.flags|join(", ") }}</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>None found</p>
+    {% endif %}
+
+    <h2>Attachments</h2>
+    {% if result.attachments %}
+        <ul>
+            {% for att in result.attachments %}
+                <li>
+                    {{ att.filename }} ({{ att.content_type }}, {{ att.size_bytes }} bytes)
+                    {% if att.hashes %}
+                        <br>SHA256: {{ att.hashes.sha256 }}
+                    {% endif %}
+                    {% if att.dangerous_extension %}
+                        <br><span style="color: red;">WARNING: dangerous file extension</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>None found</p>
+    {% endif %}
+
+    <br>
+    <a href="/">Analyze another email</a>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SHEILD - Phishing Email Analyzer</title>
+</head>
+<body>
+    <h1>SHEILD</h1>
+    <p>Upload a .eml file to analyze it for phishing indicators.</p>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="email_file" accept=".eml">
+        <button type="submit">Analyze</button>
+    </form>
+</body>
+</html>
+
