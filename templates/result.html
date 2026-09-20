@@ -65,6 +65,24 @@
     {% else %}
         <p>None found</p>
     {% endif %}
+    
+    <h2>Content Analysis</h2>
+    {% if result.content.urgency_phrases or result.content.threat_phrases or result.content.generic_greeting %}
+        <ul>
+            {% if result.content.urgency_phrases %}
+                <li>Urgency language: {{ result.content.urgency_phrases|join(", ") }}</li>
+            {% endif %}
+            {% if result.content.threat_phrases %}
+                <li>Threat language: {{ result.content.threat_phrases|join(", ") }}</li>
+            {% endif %}
+            {% if result.content.generic_greeting %}
+                <li>Generic greeting: {{ result.content.generic_greeting|join(", ") }}</li>
+            {% endif %}
+        </ul>
+    {% else %}
+        <p>No suspicious content patterns found</p>
+    {% endif %}
+
 
     <br>
     <a href="/">Analyze another email</a>
