@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>SHEILD - Analysis Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h1>SHEILD Analysis Report</h1>
@@ -10,7 +11,9 @@
     <p><strong>Subject:</strong> {{ result.headers.get("Subject", ["(no subject)"])[0] }}</p>
 
     <h2>Verdict</h2>
-    <p><strong>{{ result.verdict.level }}</strong> ({{ result.verdict.score }}/100)</p>
+    <div class="verdict-box verdict-{{ result.verdict.level|lower }}">
+        {{ result.verdict.level }} ({{ result.verdict.score }}/100)
+    </div>
     <ul>
         {% for reason in result.verdict.reasons %}
             <li>{{ reason }}</li>
@@ -38,7 +41,7 @@
                 <li>
                     {{ url.defanged }}
                     {% if url.flags %}
-                        <br><span style="color: red;">FLAGGED: {{ url.flags|join(", ") }}</span>
+                        <br><span class="error">FLAGGED: {{ url.flags|join(", ") }}</span>
                     {% endif %}
                 </li>
             {% endfor %}
@@ -57,7 +60,7 @@
                         <br>SHA256: {{ att.hashes.sha256 }}
                     {% endif %}
                     {% if att.dangerous_extension %}
-                        <br><span style="color: red;">WARNING: dangerous file extension</span>
+                        <br><span class="error">WARNING: dangerous file extension</span>
                     {% endif %}
                 </li>
             {% endfor %}
@@ -65,7 +68,7 @@
     {% else %}
         <p>None found</p>
     {% endif %}
-    
+
     <h2>Content Analysis</h2>
     {% if result.content.urgency_phrases or result.content.threat_phrases or result.content.generic_greeting %}
         <ul>
@@ -82,7 +85,6 @@
     {% else %}
         <p>No suspicious content patterns found</p>
     {% endif %}
-
 
     <br>
     <a href="/">Analyze another email</a>
