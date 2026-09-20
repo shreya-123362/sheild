@@ -5,7 +5,7 @@ attachments) into one overall risk score and verdict.
 """
 
 
-def score_email(header_results, auth_results, url_results, attachment_results):
+def score_email(header_results, auth_results, url_results, attachment_results, content_results):
     """
     Takes the output of all four analyzer modules and produces:
     - a numeric score (0-100)
@@ -55,6 +55,20 @@ def score_email(header_results, auth_results, url_results, attachment_results):
         if att["dangerous_extension"]:
             score += 20
             reasons.append(f"Attachment '{att['filename']}' has a dangerous file extension")
+
+   
+    # --- Content analysis ---
+    if content_results["urgency_phrases"]:
+        score += 5
+        reasons.append(f"Urgency language found: {', '.join(content_results['urgency_phrases'])}")
+
+    if content_results["threat_phrases"]:
+        score += 10
+        reasons.append(f"Threat language found: {', '.join(content_results['threat_phrases'])}")
+
+    if content_results["generic_greeting"]:
+        score += 5
+        reasons.append(f"Generic greeting found: {', '.join(content_results['generic_greeting'])}")
 
     # Cap at 100 - lots of small flags shouldn't produce a nonsensical score like 250
     score = min(score, 100)

@@ -35,7 +35,7 @@ def analyze_email_file(filepath):
     attachment_results = analyze_attachments(attachments)
     content_results = analyze_content(plain_text, html)
 
-    verdict = score_email(header_results, auth_results, url_results, attachment_results)
+    verdict = score_email(header_results, auth_results, url_results, attachment_results, content_results)
 
     return {
         "headers": headers,
