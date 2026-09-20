@@ -13,6 +13,7 @@ from analyzer.header_forensics import analyze_headers
 from analyzer.auth_checks import analyze_auth
 from analyzer.url_analysis import analyze_urls
 from analyzer.attachment_analysis import analyze_attachments
+from analyzer.content_analysis import analyze_content
 from analyzer.risk_scorer import score_email
 
 
@@ -32,6 +33,7 @@ def analyze_email_file(filepath):
     auth_results = analyze_auth(headers)
     url_results = analyze_urls(plain_text, html)
     attachment_results = analyze_attachments(attachments)
+    content_results = analyze_content(plain_text, html)
 
     verdict = score_email(header_results, auth_results, url_results, attachment_results)
 
@@ -41,9 +43,9 @@ def analyze_email_file(filepath):
         "auth": auth_results,
         "urls": url_results,
         "attachments": attachment_results,
+        "content": content_results,
         "verdict": verdict,
     }
-
 
 def main():
     # argparse auto-generates --help, handles missing/invalid arguments,
@@ -108,6 +110,17 @@ def print_report(result):
     else:
         print("  None found")
 
+   
+    print("\n--- Content Analysis ---")
+    content = result["content"]
+    if content["urgency_phrases"]:
+        print(f"  Urgency language detected: {', '.join(content['urgency_phrases'])}")
+    if content["threat_phrases"]:
+        print(f"  Threat language detected: {', '.join(content['threat_phrases'])}")
+    if content["generic_greeting"]:
+        print(f"  Generic greeting detected: {', '.join(content['generic_greeting'])}")
+    if not any([content["urgency_phrases"], content["threat_phrases"], content["generic_greeting"]]):
+        print("  No suspicious content patterns found")
     print("\n" + "=" * 55)
     verdict = result["verdict"]
     print(f"VERDICT: {verdict['level']} ({verdict['score']}/100)")
