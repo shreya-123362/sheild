@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SHEILD - Case History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>SHEILD Case History</h1>
+    <p><a href="/">← Analyze a new email</a></p>
+
+    {% if cases %}
+        <ul>
+            {% for case in cases %}
+                <li>
+                    <a href="{{ url_for('view_case', case_id=case.id) }}">
+                        <strong>{{ case.subject }}</strong>
+                    </a>
+                    <br>
+                    From: {{ case.from }}
+                    <br>
+                    Verdict:
+                    <span class="verdict-{{ case.level|lower }}">
+                        {{ case.level }} ({{ case.score }}/100)
+                    </span>
+                    <br>
+                    <small>{{ case.timestamp }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No cases analyzed yet.</p>
+    {% endif %}
+</body>
+</html>
