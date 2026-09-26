@@ -19,8 +19,6 @@ app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Pre-loaded sample emails for the Wall of Shame gallery.
-# Each entry: (filename in samples/, short label shown on the gallery page)
 GALLERY_SAMPLES = [
     ("example.eml", "Fake PayPal Account Suspension"),
     ("legit_example.eml", "Legitimate GitHub Notification"),
@@ -30,10 +28,6 @@ GALLERY_SAMPLES = [
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    """
-    GET: show the upload form
-    POST: analyze the uploaded file, save it as a case, redirect to its report page
-    """
     if request.method == "POST":
         file = request.files.get("email_file")
 
@@ -53,9 +47,6 @@ def index():
 
 @app.route("/case/<case_id>")
 def view_case(case_id):
-    """
-    Shows the full report for one saved case, looked up by its ID.
-    """
     case = load_case(case_id)
     if not case:
         return "Case not found", 404
@@ -65,9 +56,6 @@ def view_case(case_id):
 
 @app.route("/history")
 def history():
-    """
-    Shows a list of all past scans, newest first, plus earned badges.
-    """
     cases = list_cases()
     total = len(cases)
     earned = get_earned_badges(total)
@@ -84,10 +72,6 @@ def history():
 
 @app.route("/compare", methods=["GET", "POST"])
 def compare():
-    """
-    GET: show a form to pick two cases to compare (or two IDs via query params)
-    POST: show both cases side by side
-    """
     cases = list_cases()
 
     case_a_id = request.values.get("case_a")
@@ -111,21 +95,11 @@ def compare():
 
 @app.route("/gallery")
 def gallery():
-    """
-    Wall of Shame - shows a curated list of pre-loaded sample emails
-    so visitors can see SHEILD in action without uploading anything.
-    """
     return render_template("gallery.html", samples=GALLERY_SAMPLES)
 
 
 @app.route("/gallery/<filename>")
 def view_gallery_sample(filename):
-    """
-    Analyzes one specific pre-loaded sample on the fly and shows the
-    full report - same template as a real uploaded case.
-    """
-    # Only allow filenames that are actually in our approved gallery list -
-    # prevents someone from tampering with the URL to read arbitrary files
     allowed_filenames = [f for f, label in GALLERY_SAMPLES]
     if filename not in allowed_filenames:
         return "Sample not found", 404
@@ -137,4 +111,5 @@ def view_gallery_sample(filename):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
