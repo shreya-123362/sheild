@@ -12,7 +12,7 @@ Phishing triage is one of the most common day-to-day tasks in a SOC. Instead of 
 
 ## Features
 
-- **Header forensics** — detects From/Reply-To and From/Return-Path domain mismatches, and brand impersonation in display names (e.g. "PayPal" name with a non-PayPal domain)
+- **Header forensics** — detects From/Reply-To and From/Return-Path domain mismatches (recognizing legitimate subdomain relationships used by marketing/transactional mail platforms), and brand impersonation in display names
 - **SPF / DKIM / DMARC parsing** — verifies whether the sending server was actually authorized to send as that domain
 - **URL analysis** — extracts and defangs links, flags raw-IP URLs, excessive subdomains, and lookalike/typosquatted domains (e.g. `paypa1.com` vs `paypal.com`)
 - **Attachment hashing** — computes MD5/SHA1/SHA256 hashes and flags dangerous file extensions, without ever executing the file
@@ -25,13 +25,17 @@ Phishing triage is one of the most common day-to-day tasks in a SOC. Instead of 
 
 ## Validation
 
-Tested against three deliberately different samples to confirm the scorer discriminates correctly, not just flags everything:
+Tested against both crafted samples and real-world emails to confirm the scorer discriminates correctly, not just flags everything:
 
 | Sample | Result |
 |---|---|
 | Fake PayPal phishing email (spoofed domain, failed auth, urgency language) | **Critical (100/100)** |
 | Legitimate GitHub notification (passing auth, matching domains) | **Low (0/100)** |
 | Legitimate marketing email with mild urgency language only | **Low (5/100)** |
+| Real marketing email pulled from personal inbox | **Low (0/100)** |
+| Real internship announcement pulled from personal inbox | **Low (0/100)** |
+
+Testing against real inbox mail (not just crafted samples) surfaced an actual false positive: the Return-Path check was flagging legitimate marketing-platform bounce subdomains (e.g. `bounce.company.com` for `company.com`) as suspicious. Fixed by checking for a subdomain relationship before flagging a mismatch — verified against both the real email that exposed it and the full original test suite to confirm no regressions.
 
 ## Tech stack
 
@@ -61,6 +65,7 @@ Each analysis module (`analyzer/parser.py`, `header_forensics.py`, `auth_checks.
 
 ## Known limitations
 
+- Catches common/opportunistic phishing (spoofed domains, failed auth, urgency language) reliably; would miss sophisticated targeted attacks from compromised legitimate accounts, since those pass authentication and domain checks
 - Case history is stored as local JSON files, which don't persist across free-tier hosting restarts — a production version would use a real database
 - No live threat intelligence lookups (VirusTotal, etc.) yet — attachment/URL analysis is currently local-only
 - Brand/lookalike detection lists are a curated starter set, not exhaustive
@@ -68,3 +73,4 @@ Each analysis module (`analyzer/parser.py`, `header_forensics.py`, `auth_checks.
 ## Author
 
 Built by Shreya Ganesh, cybersecurity student.
+
