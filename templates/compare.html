@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SHEILD - Comparison</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .compare-grid {
+            display: flex;
+            gap: 20px;
+        }
+        .compare-column {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Case Comparison</h1>
+    <p><a href="{{ url_for('compare') }}">← Compare different cases</a></p>
+
+    <div class="compare-grid">
+        <div class="compare-column">
+            <h2>Case A</h2>
+            <p><strong>From:</strong> {{ case_a.headers.get("From", ["Unknown"])[0] }}</p>
+            <p><strong>Subject:</strong> {{ case_a.headers.get("Subject", ["(no subject)"])[0] }}</p>
+            <div class="verdict-box verdict-{{ case_a.verdict.level|lower }}">
+                {{ case_a.verdict.level }} ({{ case_a.verdict.score }}/100)
+            </div>
+            <ul>
+                {% for reason in case_a.verdict.reasons %}
+                    <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+            <p>SPF: {{ case_a.auth.spf }} | DKIM: {{ case_a.auth.dkim }} | DMARC: {{ case_a.auth.dmarc }}</p>
+        </div>
+
+        <div class="compare-column">
+            <h2>Case B</h2>
+            <p><strong>From:</strong> {{ case_b.headers.get("From", ["Unknown"])[0] }}</p>
+            <p><strong>Subject:</strong> {{ case_b.headers.get("Subject", ["(no subject)"])[0] }}</p>
+            <div class="verdict-box verdict-{{ case_b.verdict.level|lower }}">
+                {{ case_b.verdict.level }} ({{ case_b.verdict.score }}/100)
+            </div>
+            <ul>
+                {% for reason in case_b.verdict.reasons %}
+                    <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+            <p>SPF: {{ case_b.auth.spf }} | DKIM: {{ case_b.auth.dkim }} | DMARC: {{ case_b.auth.dmarc }}</p>
+        </div>
+    </div>
+</body>
+</html>

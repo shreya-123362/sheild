@@ -6,7 +6,10 @@
 </head>
 <body>
     <h1>SHEILD Case History</h1>
-    <p><a href="/">← Analyze a new email</a></p>
+    <p>
+        <a href="/">← Analyze a new email</a> |
+        <a href="{{ url_for('compare') }}">Compare cases</a>
+    </p>
 
     <h2>Badges</h2>
     <p>Total cases analyzed: {{ total }}</p>

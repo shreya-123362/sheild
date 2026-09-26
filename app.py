@@ -2,7 +2,8 @@
 app.py
 SHEILD web interface - Flask app.
 Lets you upload an .eml file, analyzes it, saves the result as a
-case, shows a browsable history of past scans, and tracks badges.
+case, shows a browsable history of past scans, tracks badges,
+and lets you compare two past cases side by side.
 """
 
 from flask import Flask, render_template, request, redirect, url_for
@@ -70,6 +71,33 @@ def history():
         earned_badges=earned,
         next_badge=next_badge,
     )
+
+
+@app.route("/compare", methods=["GET", "POST"])
+def compare():
+    """
+    GET: show a form to pick two cases to compare (or two IDs via query params)
+    POST: show both cases side by side
+    """
+    cases = list_cases()
+
+    case_a_id = request.values.get("case_a")
+    case_b_id = request.values.get("case_b")
+
+    if case_a_id and case_b_id:
+        case_a = load_case(case_a_id)
+        case_b = load_case(case_b_id)
+
+        if not case_a or not case_b:
+            return "One or both cases not found", 404
+
+        return render_template(
+            "compare.html",
+            case_a=case_a["full_result"],
+            case_b=case_b["full_result"],
+        )
+
+    return render_template("compare_select.html", cases=cases)
 
 
 if __name__ == "__main__":
