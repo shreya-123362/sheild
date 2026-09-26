@@ -8,6 +8,22 @@
     <h1>SHEILD Case History</h1>
     <p><a href="/">← Analyze a new email</a></p>
 
+    <h2>Badges</h2>
+    <p>Total cases analyzed: {{ total }}</p>
+    {% if earned_badges %}
+        <ul>
+            {% for badge in earned_badges %}
+                <li><strong>{{ badge.name }}</strong> — {{ badge.description }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No badges earned yet - analyze your first email to get started.</p>
+    {% endif %}
+    {% if next_badge %}
+        <p><small>{{ next_badge.remaining }} more case(s) until "{{ next_badge.name }}"</small></p>
+    {% endif %}
+
+    <h2>Cases</h2>
     {% if cases %}
         <ul>
             {% for case in cases %}

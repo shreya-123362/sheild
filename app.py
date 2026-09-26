@@ -2,7 +2,7 @@
 app.py
 SHEILD web interface - Flask app.
 Lets you upload an .eml file, analyzes it, saves the result as a
-case, and shows a browsable history of past scans.
+case, shows a browsable history of past scans, and tracks badges.
 """
 
 from flask import Flask, render_template, request, redirect, url_for
@@ -10,6 +10,7 @@ import os
 
 from cli import analyze_email_file
 from analyzer.case_storage import save_case, load_case, list_cases
+from analyzer.badges import get_earned_badges, get_next_badge
 
 app = Flask(__name__)
 
@@ -55,10 +56,20 @@ def view_case(case_id):
 @app.route("/history")
 def history():
     """
-    Shows a list of all past scans, newest first.
+    Shows a list of all past scans, newest first, plus earned badges.
     """
     cases = list_cases()
-    return render_template("history.html", cases=cases)
+    total = len(cases)
+    earned = get_earned_badges(total)
+    next_badge = get_next_badge(total)
+
+    return render_template(
+        "history.html",
+        cases=cases,
+        total=total,
+        earned_badges=earned,
+        next_badge=next_badge,
+    )
 
 
 if __name__ == "__main__":
