@@ -3,7 +3,8 @@ app.py
 SHEILD web interface - Flask app.
 Lets you upload an .eml file, analyzes it, saves the result as a
 case, shows a browsable history of past scans, tracks badges,
-and lets you compare two past cases side by side.
+lets you compare two past cases side by side, and offers a
+"Wall of Shame" gallery of pre-loaded sample cases for instant demoing.
 """
 
 from flask import Flask, render_template, request, redirect, url_for
@@ -17,6 +18,14 @@ app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Pre-loaded sample emails for the Wall of Shame gallery.
+# Each entry: (filename in samples/, short label shown on the gallery page)
+GALLERY_SAMPLES = [
+    ("example.eml", "Fake PayPal Account Suspension"),
+    ("legit_example.eml", "Legitimate GitHub Notification"),
+    ("borderline_example.eml", "Spotify Marketing Email (Borderline)"),
+]
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -98,6 +107,33 @@ def compare():
         )
 
     return render_template("compare_select.html", cases=cases)
+
+
+@app.route("/gallery")
+def gallery():
+    """
+    Wall of Shame - shows a curated list of pre-loaded sample emails
+    so visitors can see SHEILD in action without uploading anything.
+    """
+    return render_template("gallery.html", samples=GALLERY_SAMPLES)
+
+
+@app.route("/gallery/<filename>")
+def view_gallery_sample(filename):
+    """
+    Analyzes one specific pre-loaded sample on the fly and shows the
+    full report - same template as a real uploaded case.
+    """
+    # Only allow filenames that are actually in our approved gallery list -
+    # prevents someone from tampering with the URL to read arbitrary files
+    allowed_filenames = [f for f, label in GALLERY_SAMPLES]
+    if filename not in allowed_filenames:
+        return "Sample not found", 404
+
+    filepath = os.path.join("samples", filename)
+    result = analyze_email_file(filepath)
+
+    return render_template("result.html", result=result, case_id=None)
 
 
 if __name__ == "__main__":

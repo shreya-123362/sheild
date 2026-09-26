@@ -1,0 +1,45 @@
+Delivered-To: buddy@example.com
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id abc123;
+        Fri, 19 Sep 2026 10:15:00 -0700 (PDT)
+Received-SPF: pass (google.com: domain of notifications@github.com designates 209.85.220.41 as permitted sender)
+Authentication-Results: mx.google.com;
+       spf=pass (google.com: domain of notifications@github.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=notifications@github.com;
+       dkim=pass header.i=@github.com;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=github.com
+From: "GitHub" <notifications@github.com>
+Reply-To: notifications@github.com
+To: buddy@example.com
+Return-Path: <notifications@github.com>
+Subject: [sheild] New issue opened
+Date: Fri, 19 Sep 2026 17:15:00 +0000
+Message-ID: <20260919171500.XYZ789@github.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="boundary2"
+
+--boundary2
+Content-Type: text/plain; charset="UTF-8"
+
+Hi Shreya,
+
+A new issue was opened in the sheild repository.
+
+Issue #4: Add support for .msg file format
+
+View it here: https://github.com/shreyaganesh/sheild/issues/4
+
+Thanks,
+The GitHub Team
+
+--boundary2
+Content-Type: text/html; charset="UTF-8"
+
+<html><body>
+<p>Hi Shreya,</p>
+<p>A new issue was opened in the sheild repository.</p>
+<p><b>Issue #4: Add support for .msg file format</b></p>
+<p><a href="https://github.com/shreyaganesh/sheild/issues/4">View it here</a></p>
+<p>Thanks,<br>The GitHub Team</p>
+</body></html>
+
+--boundary2--

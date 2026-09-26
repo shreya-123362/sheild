@@ -1,0 +1,45 @@
+Delivered-To: buddy@example.com
+Received: from mailgun.spotify.com (mailgun.spotify.com. [198.61.254.11])
+        by mx.google.com with SMTPS id def456;
+        Fri, 19 Sep 2026 09:00:00 -0700 (PDT)
+Received-SPF: pass (google.com: domain of no-reply@spotify.com designates 198.61.254.11 as permitted sender)
+Authentication-Results: mx.google.com;
+       spf=pass (google.com: domain of no-reply@spotify.com designates 198.61.254.11 as permitted sender) smtp.mailfrom=no-reply@spotify.com;
+       dkim=pass header.i=@spotify.com;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=spotify.com
+From: "Spotify" <no-reply@spotify.com>
+Reply-To: no-reply@spotify.com
+To: buddy@example.com
+Return-Path: <no-reply@spotify.com>
+Subject: Last chance - Premium discount ends tonight
+Date: Fri, 19 Sep 2026 16:00:00 +0000
+Message-ID: <20260919160000.MKT001@spotify.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="boundary3"
+
+--boundary3
+Content-Type: text/plain; charset="UTF-8"
+
+Hi Shreya,
+
+This is your last chance to get 3 months of Premium for the price of 1.
+This offer expires tonight at midnight, so act now before it's gone!
+
+Upgrade here: https://www.spotify.com/premium/offer
+
+See you on the other side,
+The Spotify Team
+
+--boundary3
+Content-Type: text/html; charset="UTF-8"
+
+<html><body>
+<p>Hi Shreya,</p>
+<p>This is your <b>last chance</b> to get 3 months of Premium for the
+price of 1. This offer expires tonight at midnight, so act now before
+it's gone!</p>
+<p><a href="https://www.spotify.com/premium/offer">Upgrade here</a></p>
+<p>See you on the other side,<br>The Spotify Team</p>
+</body></html>
+
+--boundary3--

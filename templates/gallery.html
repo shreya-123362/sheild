@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SHEILD - Wall of Shame</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Wall of Shame</h1>
+    <p><a href="/">← Analyze your own email</a></p>
+    <p>A few sample cases to see SHEILD in action, no upload needed.</p>
+
+    <ul>
+        {% for filename, label in samples %}
+            <li>
+                <a href="{{ url_for('view_gallery_sample', filename=filename) }}">
+                    {{ label }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
