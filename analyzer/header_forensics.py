@@ -10,23 +10,32 @@ import re
 def extract_domain(email_address):
     """
     Pulls just the domain out of an email address string.
-    e.g. 'security@paypa1-verify.com' -> 'paypa1-verify.com'
-    Handles the 'Display Name <email@domain.com>' format too.
     """
     if not email_address:
         return None
-    # This regex finds anything that looks like an email inside <> or standalone
     match = re.search(r'[\w\.\-+]+@([\w\.\-]+)', email_address)
     if match:
         return match.group(1).lower()
     return None
 
 
+def is_subdomain_of(possible_subdomain, base_domain):
+    """
+    Checks if 'possible_subdomain' is actually a subdomain of 'base_domain'.
+    e.g. is_subdomain_of('fdesp.hackingflix.com', 'hackingflix.com') -> True
+    This matters because legit marketing platforms (Flodesk, Mailchimp, etc.)
+    commonly use a bounce-handling subdomain that's DIFFERENT from the main
+    domain but still clearly belongs to the same organization - not a
+    real spoofing signal.
+    """
+    if not possible_subdomain or not base_domain:
+        return False
+    return possible_subdomain == base_domain or possible_subdomain.endswith("." + base_domain)
+
+
 def check_from_reply_mismatch(headers):
     """
     Compares the domain in 'From' vs 'Reply-To'.
-    Legit emails: these usually match, or Reply-To is absent.
-    Phishing: attacker wants replies going somewhere else, so domains differ.
     """
     from_header = headers.get("From", [None])[0]
     reply_to = headers.get("Reply-To", [None])[0]
@@ -48,8 +57,10 @@ def check_from_reply_mismatch(headers):
 def check_from_returnpath_mismatch(headers):
     """
     Compares 'From' domain vs 'Return-Path' domain.
-    Return-Path is where bounce messages go - attackers often set this
-    to a domain they actually control, different from the spoofed From.
+    A subdomain relationship (e.g. bounce.company.com for from@company.com)
+    is treated as legitimate, since this is standard practice for
+    email marketing platforms and transactional mail services.
+    Only a COMPLETELY unrelated domain is flagged as suspicious.
     """
     from_header = headers.get("From", [None])[0]
     return_path = headers.get("Return-Path", [None])[0]
@@ -60,15 +71,24 @@ def check_from_returnpath_mismatch(headers):
     from_domain = extract_domain(from_header)
     return_domain = extract_domain(return_path)
 
-    if from_domain and return_domain and from_domain != return_domain:
+    if not from_domain or not return_domain:
+        return {"mismatch": False, "reason": "Could not determine domains"}
+
+    if from_domain == return_domain:
+        return {"mismatch": False, "reason": "Domains match"}
+
+    if is_subdomain_of(return_domain, from_domain) or is_subdomain_of(from_domain, return_domain):
         return {
-            "mismatch": True,
-            "reason": f"From domain '{from_domain}' differs from Return-Path domain '{return_domain}'"
+            "mismatch": False,
+            "reason": f"Return-Path domain '{return_domain}' is a related subdomain of From domain '{from_domain}' (common for marketing/transactional mail)"
         }
-    return {"mismatch": False, "reason": "Domains match"}
+
+    return {
+        "mismatch": True,
+        "reason": f"From domain '{from_domain}' differs from Return-Path domain '{return_domain}'"
+    }
 
 
-# Common brands attackers impersonate - not exhaustive, just a useful starter list
 KNOWN_BRANDS = [
     "paypal", "amazon", "microsoft", "apple", "google",
     "netflix", "bank", "facebook", "instagram", "linkedin",
@@ -78,16 +98,13 @@ KNOWN_BRANDS = [
 
 def check_brand_impersonation(headers):
     """
-    Looks at the display name in 'From' (e.g. 'PayPal Security Team')
-    and checks if it mentions a known brand while the actual domain
-    doesn't belong to that brand. This catches classic spoofing where
-    the name looks legit but the domain doesn't.
+    Looks at the display name in 'From' and checks if it mentions a
+    known brand while the actual domain doesn't belong to that brand.
     """
     from_header = headers.get("From", [None])[0]
     if not from_header:
         return {"impersonation": False, "reason": "No From header"}
 
-    # Split display name from the actual email address
     match = re.match(r'^"?([^"<]*)"?\s*<?([\w\.\-+]+@[\w\.\-]+)?>?$', from_header.strip())
     if not match:
         return {"impersonation": False, "reason": "Could not parse From header"}
@@ -111,9 +128,6 @@ def check_brand_impersonation(headers):
 def get_hop_count(headers):
     """
     Counts how many mail servers this email passed through.
-    Very few hops (1) can mean the email was sent directly from a
-    script/spoofing tool rather than a normal mail provider chain.
-    Very many hops can also be suspicious (relay hopping to hide origin).
     """
     received = headers.get("Received", [])
     return len(received)
@@ -122,7 +136,6 @@ def get_hop_count(headers):
 def analyze_headers(headers):
     """
     Runs all header checks and returns one combined result dictionary.
-    This is the function cli.py will actually call.
     """
     return {
         "from_reply_mismatch": check_from_reply_mismatch(headers),
